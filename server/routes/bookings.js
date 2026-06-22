@@ -3,42 +3,37 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
-const db = require('../db');
+const supabase = require('../lib/supabase');
 
-// Multer storage config for ID images
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../uploads'));
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `${uuidv4()}${ext}`);
-  },
-});
-
-const fileFilter = (req, file, cb) => {
-  const allowed = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'application/pdf'];
-  if (allowed.includes(file.mimetype)) {
-    cb(null, true);
-  } else {
-    cb(new Error('Only image files (JPEG, PNG, WEBP) and PDF are allowed'), false);
-  }
-};
-
+// Use memory storage — no local disk (required for Vercel serverless)
 const upload = multer({
-  storage,
-  fileFilter,
+  storage: multer.memoryStorage(),
+  fileFilter: (req, file, cb) => {
+    const allowed = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'application/pdf'];
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files (JPEG, PNG, WEBP) and PDF are allowed'), false);
+    }
+  },
   limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB max
 });
 
 // GET /api/bookings/dates — public, returns booked date ranges
-router.get('/dates', (req, res) => {
-  const rows = db.prepare('SELECT check_in, check_out FROM bookings').all();
-  res.json(rows);
+router.get('/dates', async (req, res) => {
+  const { data, error } = await supabase
+    .from('bookings')
+    .select('check_in, check_out');
+
+  if (error) {
+    console.error('Fetch dates error:', error);
+    return res.status(500).json({ error: 'Server error. Please try again.' });
+  }
+  res.json(data);
 });
 
 // POST /api/bookings — create a new booking
-router.post('/', upload.single('id_image'), (req, res) => {
+router.post('/', upload.single('id_image'), async (req, res) => {
   try {
     const { guest_name, check_in, check_out } = req.body;
 
@@ -64,22 +59,58 @@ router.post('/', upload.single('id_image'), (req, res) => {
     }
 
     // Check for overlapping bookings
-    const overlap = db.prepare(`
-      SELECT id FROM bookings
-      WHERE NOT (check_out <= ? OR check_in >= ?)
-    `).get(check_in, check_out);
+    const { data: overlap, error: overlapError } = await supabase
+      .from('bookings')
+      .select('id')
+      .lt('check_in', check_out)
+      .gt('check_out', check_in)
+      .limit(1);
 
-    if (overlap) {
+    if (overlapError) {
+      console.error('Overlap check error:', overlapError);
+      return res.status(500).json({ error: 'Server error. Please try again.' });
+    }
+
+    if (overlap && overlap.length > 0) {
       return res.status(409).json({ error: 'Selected dates overlap with an existing booking. Please choose different dates.' });
+    }
+
+    // Upload ID image to Supabase Storage
+    const ext = path.extname(req.file.originalname) || '.jpg';
+    const filename = `${uuidv4()}${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('id-images')
+      .upload(filename, req.file.buffer, {
+        contentType: req.file.mimetype,
+        upsert: false,
+      });
+
+    if (uploadError) {
+      console.error('Storage upload error:', uploadError);
+      return res.status(500).json({ error: 'Failed to upload ID image. Please try again.' });
     }
 
     const numDays = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
     const id = uuidv4();
 
-    db.prepare(`
-      INSERT INTO bookings (id, guest_name, id_image_path, check_in, check_out, num_days)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run(id, guest_name.trim(), req.file.filename, check_in, check_out, numDays);
+    const { error: insertError } = await supabase
+      .from('bookings')
+      .insert({
+        id,
+        guest_name: guest_name.trim(),
+        id_image_path: filename,
+        check_in,
+        check_out,
+        num_days: numDays,
+      });
+
+    if (insertError) {
+      console.error('Insert booking error:', insertError);
+      // Clean up uploaded image if DB insert fails
+      await supabase.storage.from('id-images').remove([filename]);
+      return res.status(500).json({ error: 'Server error. Please try again.' });
+    }
 
     res.status(201).json({ message: 'Booking confirmed!', booking_id: id });
   } catch (err) {
