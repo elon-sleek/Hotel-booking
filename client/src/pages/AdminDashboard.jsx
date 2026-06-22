@@ -1,16 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 
 function formatDateSafely(value, pattern = 'dd MMM yyyy') {
   if (!value) return '—';
-  let parsed;
-  try {
-    parsed = typeof value === 'string' ? parseISO(value) : new Date(value);
-  } catch {
-    return '—';
-  }
+  const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return '—';
   return format(parsed, pattern);
 }
