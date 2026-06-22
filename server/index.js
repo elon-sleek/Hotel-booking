@@ -50,6 +50,7 @@ app.use('/api/admin', adminLimiter, adminRoutes);
 // Serve React build in production
 const clientBuild = path.join(__dirname, '../client/dist');
 app.use(express.static(clientBuild));
+// Catch-all for React client routing (Express 5 requires /{*splat} syntax)
 app.get('/{*splat}', (req, res) => {
   res.sendFile(path.join(clientBuild, 'index.html'));
 });
