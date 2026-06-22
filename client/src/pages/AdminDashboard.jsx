@@ -70,8 +70,9 @@ export default function AdminDashboard() {
   }
 
   const today = new Date();
-  const activeBookings = bookings.filter(b => new Date(b.check_out) >= today);
-  const totalNights = bookings.reduce((s, b) => s + b.num_days, 0);
+  const safeBookings = Array.isArray(bookings) ? bookings : [];
+  const activeBookings = safeBookings.filter(b => new Date(b.check_out) >= today);
+  const totalNights = safeBookings.reduce((s, b) => s + b.num_days, 0);
 
   return (
     <div className="page">
@@ -96,7 +97,7 @@ export default function AdminDashboard() {
 
       <div className="stats-row">
         <div className="stat-card">
-          <div className="stat-value">{bookings.length}</div>
+          <div className="stat-value">{safeBookings.length}</div>
           <div className="stat-label">Total Bookings</div>
         </div>
         <div className="stat-card green">
@@ -116,7 +117,7 @@ export default function AdminDashboard() {
           <div className="spinner" style={{ borderColor: 'rgba(74,144,217,0.3)', borderTopColor: 'var(--primary)', width: '36px', height: '36px', borderWidth: '4px' }} />
           <p style={{ color: 'var(--text-muted)', marginTop: '12px' }}>Loading bookings...</p>
         </div>
-      ) : bookings.length === 0 ? (
+      ) : safeBookings.length === 0 ? (
         <div className="empty-state">
           <div className="empty-state-icon">🛏️</div>
           <div className="empty-state-text">No bookings yet. Share the app with guests!</div>
@@ -137,7 +138,7 @@ export default function AdminDashboard() {
               </tr>
             </thead>
             <tbody>
-              {bookings.map((b, i) => {
+              {safeBookings.map((b, i) => {
                 const isActive = new Date(b.check_out) >= today;
                 const isOngoing = new Date(b.check_in) <= today && new Date(b.check_out) > today;
                 const statusLabel = isOngoing ? 'Ongoing' : isActive ? 'Upcoming' : 'Past';

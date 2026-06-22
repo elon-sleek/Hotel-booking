@@ -33,13 +33,16 @@ export default function AdminLogin() {
     try {
       const res = await axios.post('/api/admin/login', { username: form.username, pin: form.pin });
       const token = res.data.token;
+      if (typeof token !== 'string' || token.split('.').length !== 3) {
+        throw new Error('Invalid login response from server.');
+      }
       const payload = decodeJwt(token);
       localStorage.setItem('adminToken', token);
       localStorage.setItem('adminRole', payload.role || '');
       localStorage.setItem('adminUsername', payload.username || '');
       navigate('/admin/dashboard');
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed.');
+      setError(err.response?.data?.error || err.message || 'Login failed.');
     } finally {
       setLoading(false);
     }
