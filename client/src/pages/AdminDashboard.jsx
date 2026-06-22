@@ -3,6 +3,13 @@ import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { format, parseISO } from 'date-fns';
 
+function formatDateSafely(value, pattern = 'dd MMM yyyy') {
+  if (!value) return '—';
+  const parsed = typeof value === 'string' ? parseISO(value) : new Date(value);
+  if (Number.isNaN(parsed.getTime())) return '—';
+  return format(parsed, pattern);
+}
+
 function authHeaders() {
   const token = localStorage.getItem('adminToken');
   return { Authorization: 'Bearer ' + token };
@@ -140,11 +147,11 @@ export default function AdminDashboard() {
                   <tr key={b.id}>
                     <td style={{ color: 'var(--text-muted)' }}>{i + 1}</td>
                     <td style={{ fontWeight: 600 }}>{b.guest_name}</td>
-                    <td>{format(parseISO(b.check_in), 'dd MMM yyyy')}</td>
-                    <td>{format(parseISO(b.check_out), 'dd MMM yyyy')}</td>
+                    <td>{formatDateSafely(b.check_in)}</td>
+                    <td>{formatDateSafely(b.check_out)}</td>
                     <td style={{ textAlign: 'center' }}><span className="badge badge-blue">{b.num_days}</span></td>
                     <td style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                      {format(new Date(b.created_at), 'dd MMM yyyy')}
+                      {formatDateSafely(b.created_at)}
                     </td>
                     <td><span className={'badge ' + statusClass}>{statusLabel}</span></td>
                     <td>
