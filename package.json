@@ -1,0 +1,11 @@
+{
+  "name": "hotel-booking",
+  "version": "1.0.0",
+  "description": "The Rock Apartment 2 Hotel Booking App",
+  "scripts": {
+    "dev:server": "node server/index.js",
+    "dev:client": "cd client && npm run dev",
+    "build:client": "cd client && npm run build",
+    "start": "node server/index.js"
+  }
+}
