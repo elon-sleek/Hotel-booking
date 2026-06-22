@@ -22,8 +22,8 @@ export default function AdminSettings() {
     if (!form.current_pin || !form.new_pin || !form.confirm_pin) {
       return setError('All fields are required.');
     }
-    if (form.new_pin.length < 4) {
-      return setError('New PIN must be at least 4 characters.');
+    if (form.new_pin.length < 6) {
+      return setError('New PIN must be at least 6 characters.');
     }
     if (form.new_pin !== form.confirm_pin) {
       return setError('New PIN and confirmation do not match.');
@@ -84,7 +84,7 @@ export default function AdminSettings() {
               id="new_pin"
               name="new_pin"
               type="password"
-              placeholder="At least 4 characters"
+              placeholder="At least 6 characters"
               value={form.new_pin}
               onChange={handleChange}
               autoComplete="new-password"

@@ -47,7 +47,7 @@ export default function AdminLogin() {
               autoFocus
               required
             />
-            <p className="hint" style={{ textAlign: 'center' }}>Default PIN: 1234 — change after first login</p>
+            <p className="hint" style={{ textAlign: 'center' }}>Default PIN: 1234 — change after first login (min 6 chars)</p>
           </div>
           <button className="btn btn-primary" type="submit" disabled={loading} style={{ width: '100%', marginTop: '8px' }}>
             {loading ? <><span className="spinner" /> Verifying…</> : '🔓 Login'}

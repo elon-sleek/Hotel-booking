@@ -55,8 +55,8 @@ router.put('/pin', requireAdmin, (req, res) => {
     return res.status(400).json({ error: 'current_pin and new_pin are required.' });
   }
 
-  if (String(new_pin).length < 4) {
-    return res.status(400).json({ error: 'New PIN must be at least 4 characters.' });
+  if (String(new_pin).length < 6) {
+    return res.status(400).json({ error: 'New PIN must be at least 6 characters.' });
   }
 
   const admin = db.prepare('SELECT pin_hash FROM admin WHERE id = 1').get();

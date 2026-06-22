@@ -51,7 +51,8 @@ export default function AdminDashboard() {
   }
 
   function viewId(id) {
-    window.open('/api/admin/bookings/' + id + '/id-image', '_blank');
+    const token = encodeURIComponent(localStorage.getItem('adminToken') || '');
+    window.open('/api/admin/bookings/' + id + '/id-image?token=' + token, '_blank');
   }
 
   const today = new Date();
