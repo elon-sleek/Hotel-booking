@@ -5,6 +5,11 @@ const rateLimit = require('express-rate-limit');
 
 const app = express();
 
+// Trust Vercel's proxy so req.ip resolves to the real client IP.
+// Without this every request shares the same proxy IP and rate-limiters
+// would throttle all users together.
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(cors());
 app.use(express.json());
