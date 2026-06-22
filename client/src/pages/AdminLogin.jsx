@@ -2,20 +2,39 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 
+function decodeJwt(token) {
+  try {
+    const payload = token.split('.')[1];
+    return JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+  } catch {
+    return {};
+  }
+}
+
 export default function AdminLogin() {
-  const [pin, setPin] = useState('');
+  const [form, setForm] = useState({ username: '', pin: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  function handleChange(e) {
+    setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    setError('');
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
-    if (!pin) return setError('Please enter your PIN.');
+    if (!form.username) return setError('Please enter your username.');
+    if (!form.pin) return setError('Please enter your PIN.');
     setLoading(true);
     try {
-      const res = await axios.post('/api/admin/login', { pin });
-      localStorage.setItem('adminToken', res.data.token);
+      const res = await axios.post('/api/admin/login', { username: form.username, pin: form.pin });
+      const token = res.data.token;
+      const payload = decodeJwt(token);
+      localStorage.setItem('adminToken', token);
+      localStorage.setItem('adminRole', payload.role || '');
+      localStorage.setItem('adminUsername', payload.username || '');
       navigate('/admin/dashboard');
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed.');
@@ -35,19 +54,33 @@ export default function AdminLogin() {
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="pin">Admin PIN</label>
+            <label htmlFor="username">Username</label>
             <input
-              id="pin"
-              type="password"
-              className="pin-input"
-              placeholder="• • • •"
-              value={pin}
-              onChange={e => { setPin(e.target.value); setError(''); }}
-              maxLength={20}
+              id="username"
+              name="username"
+              type="text"
+              placeholder="Enter username"
+              value={form.username}
+              onChange={handleChange}
+              autoComplete="username"
               autoFocus
               required
             />
-            <p className="hint" style={{ textAlign: 'center' }}>Default PIN: 1234 — change after first login (min 6 chars)</p>
+          </div>
+          <div className="form-group">
+            <label htmlFor="pin">PIN</label>
+            <input
+              id="pin"
+              name="pin"
+              type="password"
+              className="pin-input"
+              placeholder="• • • •"
+              value={form.pin}
+              onChange={handleChange}
+              maxLength={20}
+              autoComplete="current-password"
+              required
+            />
           </div>
           <button className="btn btn-primary" type="submit" disabled={loading} style={{ width: '100%', marginTop: '8px' }}>
             {loading ? <><span className="spinner" /> Verifying…</> : '🔓 Login'}

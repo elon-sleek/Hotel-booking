@@ -15,6 +15,11 @@ export default function AdminDashboard() {
   const [deletingId, setDeletingId] = useState(null);
   const navigate = useNavigate();
 
+  const adminUsername = localStorage.getItem('adminUsername') || '';
+  const adminRole = localStorage.getItem('adminRole') || '';
+  const roleLabel = adminRole === 'super_admin' ? 'Super Admin' : 'Extra Admin';
+  const roleBadgeClass = adminRole === 'super_admin' ? 'badge-green' : 'badge-blue';
+
   const fetchBookings = useCallback(async () => {
     setLoading(true);
     setError('');
@@ -24,6 +29,8 @@ export default function AdminDashboard() {
     } catch (err) {
       if (err.response?.status === 401) {
         localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminRole');
+        localStorage.removeItem('adminUsername');
         navigate('/admin/login');
       } else {
         setError('Failed to load bookings.');
@@ -64,7 +71,15 @@ export default function AdminDashboard() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <h1 className="page-title">Admin Dashboard</h1>
-          <p className="page-subtitle">The Rock Apartment 2 — All Bookings</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+            <p className="page-subtitle" style={{ margin: 0 }}>The Rock Apartment 2 — All Bookings</p>
+            {adminUsername && (
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                · <strong>{adminUsername}</strong>
+                <span className={'badge ' + roleBadgeClass}>{roleLabel}</span>
+              </span>
+            )}
+          </div>
         </div>
         <div style={{ display: 'flex', gap: '10px' }}>
           <Link to="/admin/settings" className="btn btn-outline" style={{ fontSize: '0.875rem' }}>Settings</Link>
