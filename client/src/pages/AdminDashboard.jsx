@@ -5,7 +5,12 @@ import { format, parseISO } from 'date-fns';
 
 function formatDateSafely(value, pattern = 'dd MMM yyyy') {
   if (!value) return '—';
-  const parsed = typeof value === 'string' ? parseISO(value) : new Date(value);
+  let parsed;
+  try {
+    parsed = typeof value === 'string' ? parseISO(value) : new Date(value);
+  } catch {
+    return '—';
+  }
   if (Number.isNaN(parsed.getTime())) return '—';
   return format(parsed, pattern);
 }
