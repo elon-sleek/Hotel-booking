@@ -94,7 +94,7 @@ export default function Home() {
           </div>
           <div className="feature-card">
             <div className="feature-icon">🔒</div>
-            <div className="feature-label">Safe &amp; Secure</div>
+            <div className="feature-label">Safe & Secure</div>
             <div className="feature-desc">Gated compound with 24/7 security. Guest data protected under NDPR.</div>
           </div>
           <div className="feature-card">
