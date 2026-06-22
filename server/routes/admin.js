@@ -4,8 +4,12 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const supabase = require('../lib/supabase');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'rockApartment2_secret_2024';
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable must be set.');
+}
 const TOKEN_EXPIRY = '8h';
+const SIGNED_URL_EXPIRY_SECONDS = 60 * 60; // 1 hour
 
 // Seed the super admin from env vars if not already present (runs once per cold start)
 let superAdminSeeded = false;
@@ -33,7 +37,7 @@ async function ensureSuperAdmin() {
       role: 'super_admin',
       active: true,
     });
-    console.log(`Super admin "${username}" seeded.`);
+    console.log('Super admin seeded.');
   }
   superAdminSeeded = true;
 }
@@ -211,7 +215,7 @@ router.get('/bookings/:id/id-image', requireAdmin, async (req, res) => {
 
   const { data: signedData, error: signError } = await supabase.storage
     .from('id-images')
-    .createSignedUrl(id_image_path, 60 * 60); // 1 hour expiry
+    .createSignedUrl(id_image_path, SIGNED_URL_EXPIRY_SECONDS);
 
   if (signError || !signedData) {
     return res.status(500).json({ error: 'Failed to generate image URL.' });

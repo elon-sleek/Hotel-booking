@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 
+// Decode JWT payload for display purposes only (role badge, username in UI).
+// No authorization decisions are made client-side; the server always re-validates the token.
 function decodeJwt(token) {
   try {
     const payload = token.split('.')[1];

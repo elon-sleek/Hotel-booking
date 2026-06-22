@@ -45,4 +45,4 @@ const { router: adminRoutes } = require('./routes/admin');
 app.use('/api/bookings', bookingLimiter, bookingRoutes);
 app.use('/api/admin', adminLimiter, adminRoutes);
 
-module.exports = app;
+module.exports = { app, generalLimiter };
