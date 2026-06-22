@@ -34,9 +34,9 @@ export default function AdminLogin() {
       const res = await axios.post('/api/admin/login', { username: form.username, pin: form.pin });
       const token = res.data.token;
       const parts = typeof token === 'string' ? token.split('.') : [];
-      const isJwtLike = parts.length === 3 && parts.every(p => p.length > 0 && /^[A-Za-z0-9_-]+$/.test(p));
-      if (!isJwtLike) {
-        throw new Error('Invalid login response from server.');
+      const hasValidJwtStructure = parts.length === 3 && parts.every(p => p.length > 0 && /^[A-Za-z0-9_-]+$/.test(p));
+      if (!hasValidJwtStructure) {
+        throw new Error('Server returned an invalid authentication token. Please try again.');
       }
       const payload = decodeJwt(token);
       localStorage.setItem('adminToken', token);
