@@ -1,0 +1,10 @@
+node_modules/
+server/node_modules/
+client/node_modules/
+server/uploads/*
+!server/uploads/.gitkeep
+server/bookings.db
+server/.env
+client/dist/
+.DS_Store
+*.log
