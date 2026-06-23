@@ -6,7 +6,7 @@ const supabase = require('../lib/supabase');
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET environment variable must be set.');
+  console.error('FATAL: JWT_SECRET environment variable is not set.');
 }
 const TOKEN_EXPIRY = '8h';
 const SIGNED_URL_EXPIRY_SECONDS = 60 * 60; // 1 hour
@@ -44,6 +44,9 @@ async function ensureSuperAdmin() {
 
 // Middleware: verify admin JWT
 function requireAdmin(req, res, next) {
+  if (!JWT_SECRET || !supabase) {
+    return res.status(503).json({ error: 'Server misconfigured. Check environment variables.' });
+  }
   const auth = req.headers.authorization;
   const queryToken = req.query.token;
   const rawToken = auth && auth.startsWith('Bearer ') ? auth.slice(7) : queryToken;
@@ -71,6 +74,9 @@ function requireSuperAdmin(req, res, next) {
 
 // POST /api/admin/login
 router.post('/login', async (req, res) => {
+  if (!JWT_SECRET || !supabase) {
+    return res.status(503).json({ error: 'Server misconfigured. Check environment variables.' });
+  }
   await ensureSuperAdmin();
 
   const { username, pin } = req.body;

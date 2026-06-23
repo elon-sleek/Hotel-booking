@@ -21,6 +21,9 @@ const upload = multer({
 
 // GET /api/bookings/dates — public, returns booked date ranges
 router.get('/dates', async (req, res) => {
+  if (!supabase) {
+    return res.status(503).json({ error: 'Server misconfigured. Check environment variables.' });
+  }
   const { data, error } = await supabase
     .from('bookings')
     .select('check_in, check_out');
@@ -34,6 +37,9 @@ router.get('/dates', async (req, res) => {
 
 // POST /api/bookings — create a new booking
 router.post('/', upload.single('id_image'), async (req, res) => {
+  if (!supabase) {
+    return res.status(503).json({ error: 'Server misconfigured. Check environment variables.' });
+  }
   try {
     const { guest_name, check_in, check_out } = req.body;
 
