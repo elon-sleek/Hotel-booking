@@ -5,16 +5,16 @@ const path = require('path');
 const supabase = require('../lib/supabase');
 
 let uuidv4Fn;
-let uuidV4Loader;
+let uuidv4Loader;
 async function generateUuid() {
   if (!uuidv4Fn) {
-    if (!uuidV4Loader) {
-      uuidV4Loader = import('uuid').then(({ v4 }) => {
+    if (!uuidv4Loader) {
+      uuidv4Loader = import('uuid').then(({ v4 }) => {
         uuidv4Fn = v4;
         return v4;
       });
     }
-    await uuidV4Loader;
+    await uuidv4Loader;
   }
   return uuidv4Fn();
 }
