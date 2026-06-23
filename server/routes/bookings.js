@@ -2,8 +2,16 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-const { v4: uuidv4 } = require('uuid');
 const supabase = require('../lib/supabase');
+
+let uuidV4Loader;
+async function generateUuid() {
+  if (!uuidV4Loader) {
+    uuidV4Loader = import('uuid').then(({ v4 }) => v4);
+  }
+  const uuidv4 = await uuidV4Loader;
+  return uuidv4();
+}
 
 // Use memory storage — no local disk (required for Vercel serverless)
 const upload = multer({
@@ -83,7 +91,7 @@ router.post('/', upload.single('id_image'), async (req, res) => {
 
     // Upload ID image to Supabase Storage
     const ext = path.extname(req.file.originalname) || '.jpg';
-    const filename = `${uuidv4()}${ext}`;
+    const filename = `${await generateUuid()}${ext}`;
 
     const { error: uploadError } = await supabase.storage
       .from('id-images')
@@ -98,7 +106,7 @@ router.post('/', upload.single('id_image'), async (req, res) => {
     }
 
     const numDays = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
-    const id = uuidv4();
+    const id = await generateUuid();
 
     const { error: insertError } = await supabase
       .from('bookings')
