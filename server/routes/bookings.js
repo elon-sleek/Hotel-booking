@@ -4,13 +4,19 @@ const multer = require('multer');
 const path = require('path');
 const supabase = require('../lib/supabase');
 
+let uuidv4Fn;
 let uuidV4Loader;
 async function generateUuid() {
-  if (!uuidV4Loader) {
-    uuidV4Loader = import('uuid').then(({ v4 }) => v4);
+  if (!uuidv4Fn) {
+    if (!uuidV4Loader) {
+      uuidV4Loader = import('uuid').then(({ v4 }) => {
+        uuidv4Fn = v4;
+        return v4;
+      });
+    }
+    await uuidV4Loader;
   }
-  const uuidv4 = await uuidV4Loader;
-  return uuidv4();
+  return uuidv4Fn();
 }
 
 // Use memory storage — no local disk (required for Vercel serverless)
