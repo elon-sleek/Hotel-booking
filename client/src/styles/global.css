@@ -377,6 +377,10 @@ img {
   font-weight: 700;
 }
 
+.react-calendar__month-view__days__day--weekend {
+  color: var(--text) !important;
+}
+
 .react-calendar__tile.booked {
   background: #fee2e2 !important;
   color: #c53030 !important;
