@@ -356,9 +356,37 @@ img {
   font-family: inherit !important;
 }
 
+.availability-calendar {
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 14px !important;
+  overflow: hidden;
+}
+
+.availability-calendar .react-calendar__navigation {
+  margin-bottom: 8px;
+  padding: 8px 8px 0;
+}
+
+.availability-calendar .react-calendar__navigation button {
+  min-width: 40px;
+  border-radius: 10px;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.availability-calendar .react-calendar__month-view__weekdays {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
 .react-calendar__tile {
   border-radius: 8px !important;
   font-size: 0.875rem;
+  min-height: 44px;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .react-calendar__tile:enabled:hover {
@@ -377,7 +405,7 @@ img {
   font-weight: 700;
 }
 
-.react-calendar__month-view__days__day--weekend {
+.availability-calendar .react-calendar__month-view__days__day--weekend:not(.booked) {
   color: var(--text) !important;
 }
 
@@ -389,6 +417,11 @@ img {
 
 .react-calendar__tile.booked:enabled:hover {
   background: #fecaca !important;
+}
+
+.react-calendar__tile:disabled {
+  cursor: not-allowed;
+  opacity: 1;
 }
 
 .calendar-legend {

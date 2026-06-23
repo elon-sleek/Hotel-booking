@@ -1,5 +1,6 @@
 import { StrictMode, Component } from 'react'
 import { createRoot } from 'react-dom/client'
+import 'react-calendar/dist/Calendar.css'
 import './styles/global.css'
 import App from './App.jsx'
 

@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
 import { eachDayOfInterval, parseISO, format } from 'date-fns';
 import axios from 'axios';
 
@@ -48,6 +47,7 @@ export default function BookingCalendar({ refreshKey }) {
         {loading && <span className="badge badge-blue">Loading…</span>}
       </div>
       <Calendar
+        className="availability-calendar"
         tileClassName={tileClassName}
         tileDisabled={tileDisabled}
         minDate={new Date()}
