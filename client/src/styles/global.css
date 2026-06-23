@@ -406,7 +406,7 @@ img {
 }
 
 .availability-calendar .react-calendar__month-view__days__day--weekend:not(.booked) {
-  color: var(--text) !important;
+  color: var(--primary-dark) !important;
 }
 
 .react-calendar__tile.booked {
